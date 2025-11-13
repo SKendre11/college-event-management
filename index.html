@@ -218,28 +218,40 @@
   window.selectEvent = selectEvent; // make accessible globally
 
   // 🟢 Registration form
-  const registrationForm = document.getElementById("registration-form");
-  if (registrationForm) {
-    registrationForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = registrationForm["student-name"].value.trim();
-      const email = registrationForm["student-email"].value.trim();
-      const event = registrationForm["selected-event"].value;
+  
+// 🟢 Registration form (sends data to Google Sheet)
+const registrationForm = document.getElementById("registration-form");
+if (registrationForm) {
+  registrationForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      if (!name || !email || !event) {
-        alert("Please fill all fields before submitting.");
-        return;
-      }
+    const name = registrationForm["student-name"].value.trim();
+    const email = registrationForm["student-email"].value.trim();
+    const event = registrationForm["selected-event"].value;
 
-      const newEntry = { name, email, event };
-      const data = JSON.parse(localStorage.getItem("registrations") || "[]");
-      data.push(newEntry);
-      localStorage.setItem("registrations", JSON.stringify(data));
+    if (!name || !email || !event) {
+      alert("Please fill all fields before submitting.");
+      return;
+    }
+
+    // Google Apps Script Web App URL
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx0WCVp5kqitXOBP1rkoJiRJYzqEFUp5BgWERGwpmmzuhDomdZ7GIYG-aGdtDz4aJ-zdA/exec";
+
+    try {
+      const response = await fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: new FormData(registrationForm),
+      });
 
       alert("✅ Registration successful!");
       registrationForm.reset();
-    });
-  }
+    } catch (error) {
+      console.error("Error!", error.message);
+      alert("❌ There was a problem submitting your registration.");
+    }
+  });
+}
 
   // 🟢 Display registrations
   const registrationData = document.getElementById("registration-data");
@@ -268,3 +280,4 @@
 </script>
   </body>
 </html>
+
